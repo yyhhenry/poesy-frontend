@@ -1,20 +1,21 @@
 <script setup lang="ts">
-import { registerApi, userExistsApi } from '@/utils/model';
-import { computedAsync, useDebounce } from '@vueuse/core';
+import { loginApi, registerApi, userExistsApi, type User } from '@/utils/fetch';
+import { computedAsync, useDebounce, useStorage } from '@vueuse/core';
 import { PageLayout, FlexCard, HeaderText, SwitchDark, } from '@yyhhenry/element-extra';
 import { ok, err, type Result, anyhow } from '@yyhhenry/rust-result';
-import { ElButton, ElInput, ElMessage } from 'element-plus';
+import { ElButton, ElInput, ElMessage, ElSwitch } from 'element-plus';
 import { computed, ref } from 'vue';
 import { ArrowLeftBold } from '@element-plus/icons-vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
+const mode = useStorage<'register' | 'login'>('login-mode', 'register');
 const email = ref('');
 const password = ref('');
 const debouncedEmail = useDebounce(email, 300, { maxWait: 2000 });
 const debouncedPassword = useDebounce(password, 300, { maxWait: 2000 });
 async function checkEmail(email: string): Promise<Result<[], Error>> {
-
+  mode.value; // required to trigger reactivity
   if (email === '') {
     return anyhow('邮箱不能为空');
   }
@@ -26,8 +27,11 @@ async function checkEmail(email: string): Promise<Result<[], Error>> {
   if (isUserExists.isErr()) {
     return err(isUserExists.unwrapErr());
   }
-  if (isUserExists.unwrap()) {
+  if (isUserExists.unwrap() && mode.value === 'register') {
     return anyhow(`邮箱 ${email} 已被注册`);
+  }
+  if (!isUserExists.unwrap() && mode.value === 'login') {
+    return anyhow(`邮箱 ${email} 未注册`);
   }
   return ok([]);
 }
@@ -51,28 +55,54 @@ const emailInfo = computedAsync<Result<[], Error>>(
 const passwordInfo = computed<Result<[], Error>>(() =>
   checkPassword(debouncedPassword.value),
 );
+async function checkedForm(): Promise<Result<User, Error>> {
+  return (await checkEmail(email.value))
+    .andThen(() => checkPassword(password.value))
+    .map((): User => ({
+      email: email.value,
+      password: password.value,
+    }));
+}
 async function register() {
-  const checkEmailResult = await checkEmail(email.value);
-  if (checkEmailResult.isErr()) {
-    ElMessage.error(checkEmailResult.unwrapErr().message);
+  const user = await checkedForm();
+  if (user.isErr()) {
+    ElMessage.error(user.unwrapErr().message);
     return;
   }
-  const checkPasswordResult = checkPassword(password.value);
-  if (checkPasswordResult.isErr()) {
-    ElMessage.error(checkPasswordResult.unwrapErr().message);
-    return;
-  }
-
-  const registerResponse = await registerApi({
-    email: email.value,
-    password: password.value,
-  });
+  ElMessage.info('正在连接服务器...');
+  const registerResponse = await registerApi(user.unwrap());
   if (registerResponse.isErr()) {
     ElMessage.error(registerResponse.unwrapErr().message);
     return;
   }
   ElMessage.success('注册成功');
+  router.push({
+    path: '/verify',
+    query: {
+      email: email.value,
+    },
+  });
+}
+async function login() {
+  const user = await checkedForm();
+  if (user.isErr()) {
+    ElMessage.error(user.unwrapErr().message);
+    return;
+  }
+  const registerResponse = await loginApi(user.unwrap());
+  if (registerResponse.isErr()) {
+    ElMessage.error(registerResponse.unwrapErr().message);
+    return;
+  }
+  ElMessage.success('登录成功');
   router.push('/');
+}
+async function submit() {
+  if (mode.value === 'register') {
+    await register();
+  } else {
+    await login();
+  }
 }
 </script>
 
@@ -82,13 +112,16 @@ async function register() {
       <HeaderText>
         <ElButton :type="'danger'" :plain="true" :icon="ArrowLeftBold" @click="$router.push('/')"></ElButton>
       </HeaderText>
-      <HeaderText>注册</HeaderText>
+      <HeaderText>注册 / 登录</HeaderText>
+
     </template>
     <template #header-extra>
       <SwitchDark></SwitchDark>
     </template>
     <FlexCard>
       <div :style="{ margin: '25px' }">
+        <ElSwitch v-model="mode" active-text="登录" inactive-text="注册" active-value="login" inactive-value="register"
+          :style="{ marginBottom: '15px' }"></ElSwitch>
         <ElInput v-model="email" placeholder="Email" :style="{ marginBottom: '15px' }">
           <template #suffix>
             <p :style="{ color: 'var(--el-color-danger)' }" v-if="emailInfo.isErr()">
@@ -106,7 +139,8 @@ async function register() {
         </ElInput>
 
         <div :style="{ display: 'flex', 'justify-content': 'center' }">
-          <ElButton type="primary" @click="register">注册</ElButton>
+          <ElButton v-if="mode === 'register'" type="danger" @click="register"> 注册 </ElButton>
+          <ElButton v-else type="primary" @click="login"> 登录 </ElButton>
         </div>
       </div>
     </FlexCard>

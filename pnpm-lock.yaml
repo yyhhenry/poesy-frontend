@@ -12,14 +12,14 @@ importers:
         specifier: ^2.3.1
         version: 2.3.1(vue@3.4.31(typescript@5.4.5))
       '@vueuse/core':
-        specifier: ^10.11.0
-        version: 10.11.0(vue@3.4.31(typescript@5.4.5))
+        specifier: ^10.9.0
+        version: 10.9.0(vue@3.4.31(typescript@5.4.5))
       '@yyhhenry/element-extra':
         specifier: ^0.3.1
-        version: 0.3.1(@element-plus/icons-vue@2.3.1(vue@3.4.31(typescript@5.4.5)))(@vueuse/core@10.11.0(vue@3.4.31(typescript@5.4.5)))(element-plus@2.7.6(vue@3.4.31(typescript@5.4.5)))(vue@3.4.31(typescript@5.4.5))
+        version: 0.3.1(@element-plus/icons-vue@2.3.1(vue@3.4.31(typescript@5.4.5)))(@vueuse/core@10.9.0(vue@3.4.31(typescript@5.4.5)))(element-plus@2.7.6(vue@3.4.31(typescript@5.4.5)))(vue@3.4.31(typescript@5.4.5))
       '@yyhhenry/rust-result':
-        specifier: npm:@jsr/yyhhenry__rust-result@^0.2.9
-        version: '@jsr/yyhhenry__rust-result@0.2.9'
+        specifier: ^0.3.1
+        version: 0.3.1
       element-plus:
         specifier: ^2.7.6
         version: 2.7.6(vue@3.4.31(typescript@5.4.5))
@@ -236,9 +236,6 @@ packages:
   '@jridgewell/sourcemap-codec@1.5.0':
     resolution: {integrity: sha512-gv3ZRaISU3fjPAgNsriBRqGWQL6quFx04YMPW/zD8XMLsU32mhCCbfbO6KZFLjvYpCZ8zyDEgqsgf+PwPaM7GQ==}
 
-  '@jsr/yyhhenry__rust-result@0.2.9':
-    resolution: {integrity: sha512-vHXDVmTpjVwlQGtIJj1FyYMzX7Sk9s7yLub6ceitB/nJn15ynkLAkOtkNult4xmy8HDttrHpCNZckEENS/NY9g==, tarball: https://npm.jsr.io/~/11/@jsr/yyhhenry__rust-result/0.2.9.tgz}
-
   '@oxlint/darwin-arm64@0.6.0':
     resolution: {integrity: sha512-BE/JILdyWBa2HfyJ/NQH9W4IMP+O3EcWQRGmbjLDTQzByDJ7cnfmoADR80oYzUOxKhoDDupN1KqwETigPkij9g==}
     cpu: [arm64]
@@ -442,20 +439,20 @@ packages:
   '@vue/tsconfig@0.5.1':
     resolution: {integrity: sha512-VcZK7MvpjuTPx2w6blwnwZAu5/LgBUtejFOi3pPGQFXQN5Ela03FUtd2Qtg4yWGGissVL0dr6Ro1LfOFh+PCuQ==}
 
-  '@vueuse/core@10.11.0':
-    resolution: {integrity: sha512-x3sD4Mkm7PJ+pcq3HX8PLPBadXCAlSDR/waK87dz0gQE+qJnaaFhc/dZVfJz+IUYzTMVGum2QlR7ImiJQN4s6g==}
+  '@vueuse/core@10.9.0':
+    resolution: {integrity: sha512-/1vjTol8SXnx6xewDEKfS0Ra//ncg4Hb0DaZiwKf7drgfMsKFExQ+FnnENcN6efPen+1kIzhLQoGSy0eDUVOMg==}
 
   '@vueuse/core@9.13.0':
     resolution: {integrity: sha512-pujnclbeHWxxPRqXWmdkKV5OX4Wk4YeK7wusHqRwU0Q7EFusHoqNA/aPhB6KCh9hEqJkLAJo7bb0Lh9b+OIVzw==}
 
-  '@vueuse/metadata@10.11.0':
-    resolution: {integrity: sha512-kQX7l6l8dVWNqlqyN3ePW3KmjCQO3ZMgXuBMddIu83CmucrsBfXlH+JoviYyRBws/yLTQO8g3Pbw+bdIoVm4oQ==}
+  '@vueuse/metadata@10.9.0':
+    resolution: {integrity: sha512-iddNbg3yZM0X7qFY2sAotomgdHK7YJ6sKUvQqbvwnf7TmaVPxS4EJydcNsVejNdS8iWCtDk+fYXr7E32nyTnGA==}
 
   '@vueuse/metadata@9.13.0':
     resolution: {integrity: sha512-gdU7TKNAUVlXXLbaF+ZCfte8BjRJQWPCa2J55+7/h+yDtzw3vOoGQDRXzI6pyKyo6bXFT5/QoPE4hAknExjRLQ==}
 
-  '@vueuse/shared@10.11.0':
-    resolution: {integrity: sha512-fyNoIXEq3PfX1L3NkNhtVQUSRtqYwJtJg+Bp9rIzculIZWHTkKSysujrOk2J+NrRulLTQH9+3gGSfYLWSEWU1A==}
+  '@vueuse/shared@10.9.0':
+    resolution: {integrity: sha512-Uud2IWncmAfJvRaFYzv5OHDli+FbOzxiVEQdLCKQKLyhz94PIyFC3CHcH7EDMwIn8NPtD06+PNbC/PiO0LGLtw==}
 
   '@vueuse/shared@9.13.0':
     resolution: {integrity: sha512-UrnhU+Cnufu4S6JLCPZnkWh0WwZGUp72ktOF2DFptMlOs3TOdVv8xJN53zhHGARmVOsz5KqOls09+J1NR6sBKw==}
@@ -467,6 +464,9 @@ packages:
       '@vueuse/core': ^10.9.0
       element-plus: ^2.6.3
       vue: ^3.4.21
+
+  '@yyhhenry/rust-result@0.3.1':
+    resolution: {integrity: sha512-6jXXZR0+L1qXII7Rcwu7P0xmxIKDnDmq8k6n9cc4GEjKHtYdiP4Yj6QDVhy24remN5shyWq2SRNGp4LUcqokRg==}
 
   ansi-styles@6.2.1:
     resolution: {integrity: sha512-bN798gFfQX+viw3R7yrGWRqnrN2oRkEkUjjl4JNn4E8GxxbjtG3FbrEIIY3l8/hrwUwIeCZvi4QuOTP4MErVug==}
@@ -818,8 +818,6 @@ snapshots:
 
   '@jridgewell/sourcemap-codec@1.5.0': {}
 
-  '@jsr/yyhhenry__rust-result@0.2.9': {}
-
   '@oxlint/darwin-arm64@0.6.0':
     optional: true
 
@@ -1000,11 +998,11 @@ snapshots:
 
   '@vue/tsconfig@0.5.1': {}
 
-  '@vueuse/core@10.11.0(vue@3.4.31(typescript@5.4.5))':
+  '@vueuse/core@10.9.0(vue@3.4.31(typescript@5.4.5))':
     dependencies:
       '@types/web-bluetooth': 0.0.20
-      '@vueuse/metadata': 10.11.0
-      '@vueuse/shared': 10.11.0(vue@3.4.31(typescript@5.4.5))
+      '@vueuse/metadata': 10.9.0
+      '@vueuse/shared': 10.9.0(vue@3.4.31(typescript@5.4.5))
       vue-demi: 0.14.8(vue@3.4.31(typescript@5.4.5))
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -1020,11 +1018,11 @@ snapshots:
       - '@vue/composition-api'
       - vue
 
-  '@vueuse/metadata@10.11.0': {}
+  '@vueuse/metadata@10.9.0': {}
 
   '@vueuse/metadata@9.13.0': {}
 
-  '@vueuse/shared@10.11.0(vue@3.4.31(typescript@5.4.5))':
+  '@vueuse/shared@10.9.0(vue@3.4.31(typescript@5.4.5))':
     dependencies:
       vue-demi: 0.14.8(vue@3.4.31(typescript@5.4.5))
     transitivePeerDependencies:
@@ -1038,12 +1036,14 @@ snapshots:
       - '@vue/composition-api'
       - vue
 
-  '@yyhhenry/element-extra@0.3.1(@element-plus/icons-vue@2.3.1(vue@3.4.31(typescript@5.4.5)))(@vueuse/core@10.11.0(vue@3.4.31(typescript@5.4.5)))(element-plus@2.7.6(vue@3.4.31(typescript@5.4.5)))(vue@3.4.31(typescript@5.4.5))':
+  '@yyhhenry/element-extra@0.3.1(@element-plus/icons-vue@2.3.1(vue@3.4.31(typescript@5.4.5)))(@vueuse/core@10.9.0(vue@3.4.31(typescript@5.4.5)))(element-plus@2.7.6(vue@3.4.31(typescript@5.4.5)))(vue@3.4.31(typescript@5.4.5))':
     dependencies:
       '@element-plus/icons-vue': 2.3.1(vue@3.4.31(typescript@5.4.5))
-      '@vueuse/core': 10.11.0(vue@3.4.31(typescript@5.4.5))
+      '@vueuse/core': 10.9.0(vue@3.4.31(typescript@5.4.5))
       element-plus: 2.7.6(vue@3.4.31(typescript@5.4.5))
       vue: 3.4.31(typescript@5.4.5)
+
+  '@yyhhenry/rust-result@0.3.1': {}
 
   ansi-styles@6.2.1: {}
 
