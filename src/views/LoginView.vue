@@ -3,7 +3,7 @@ import { loginApi, registerApi, userExistsApi, type User } from '@/utils/fetch';
 import { computedAsync, useDebounce, useStorage } from '@vueuse/core';
 import { PageLayout, FlexCard, HeaderText, SwitchDark, } from '@yyhhenry/element-extra';
 import { ok, err, type Result, anyhow } from '@yyhhenry/rust-result';
-import { ElButton, ElInput, ElMessage, ElSwitch } from 'element-plus';
+import { ElButton, ElInput, ElMessage, ElSwitch, ElTabPane, ElTabs } from 'element-plus';
 import { computed, ref } from 'vue';
 import { ArrowLeftBold } from '@element-plus/icons-vue';
 import { useRouter } from 'vue-router';
@@ -120,8 +120,10 @@ async function submit() {
     </template>
     <FlexCard>
       <div :style="{ margin: '25px' }">
-        <ElSwitch v-model="mode" active-text="登录" inactive-text="注册" active-value="login" inactive-value="register"
-          :style="{ marginBottom: '15px' }"></ElSwitch>
+        <ElTabs v-model="mode">
+          <ElTabPane name="register" label="注册"></ElTabPane>
+          <ElTabPane name="login" label="登录"></ElTabPane>
+        </ElTabs>
         <ElInput v-model="email" placeholder="Email" :style="{ marginBottom: '15px' }">
           <template #suffix>
             <p :style="{ color: 'var(--el-color-danger)' }" v-if="emailInfo.isErr()">
