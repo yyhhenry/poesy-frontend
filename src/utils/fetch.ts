@@ -42,8 +42,13 @@ export async function refreshToken(): Promise<Result<void, Error>> {
     skipAuth: true,
   })).map(putTokenPair);
 }
-export function logoutApi(): void {
+export async function logoutApi(): Promise<void> {
+  const refreshToken = tokenPairStorage.value?.refreshToken;
+  if (!refreshToken) {
+    return;
+  }
   tokenPairStorage.value = undefined;
+  await post('/api/user/logout', { refreshToken } satisfies RefreshRequest, isMsgResponse, { skipAuth: true });
 }
 /**
  * Refresh when expire time is within 1 minute
