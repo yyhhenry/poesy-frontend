@@ -9,23 +9,25 @@ import { ArrowLeftBold } from '@element-plus/icons-vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
-const username = ref('');
+const email = ref('');
 const password = ref('');
-const debouncedUsername = useDebounce(username, 300, { maxWait: 2000 });
+const debouncedEmail = useDebounce(email, 300, { maxWait: 2000 });
 const debouncedPassword = useDebounce(password, 300, { maxWait: 2000 });
-async function checkUsername(name: string): Promise<Result<[], Error>> {
-  if (name === '') {
-    return anyhow('用户名不能为空');
+async function checkEmail(email: string): Promise<Result<[], Error>> {
+
+  if (email === '') {
+    return anyhow('邮箱不能为空');
   }
-  if (name.length > 32) {
-    return anyhow('用户名长度不能超过 32 个字符');
+  const reg = /^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$/;
+  if (!reg.test(email)) {
+    return anyhow('邮箱格式不正确');
   }
-  const isUserExists = await userExistsApi(name);
+  const isUserExists = await userExistsApi(email);
   if (isUserExists.isErr()) {
     return err(isUserExists.unwrapErr());
   }
   if (isUserExists.unwrap()) {
-    return anyhow(`用户名${name}已存在`);
+    return anyhow(`邮箱 ${email} 已被注册`);
   }
   return ok([]);
 }
@@ -42,17 +44,17 @@ function checkPassword(password: string): Result<[], Error> {
   }
   return ok([]);
 }
-const usernameInfo = computedAsync<Result<[], Error>>(
-  () => checkUsername(debouncedUsername.value),
+const emailInfo = computedAsync<Result<[], Error>>(
+  () => checkEmail(debouncedEmail.value),
   ok([]),
 );
 const passwordInfo = computed<Result<[], Error>>(() =>
   checkPassword(debouncedPassword.value),
 );
 async function register() {
-  const checkUsernameResult = await checkUsername(username.value);
-  if (checkUsernameResult.isErr()) {
-    ElMessage.error(checkUsernameResult.unwrapErr().message);
+  const checkEmailResult = await checkEmail(email.value);
+  if (checkEmailResult.isErr()) {
+    ElMessage.error(checkEmailResult.unwrapErr().message);
     return;
   }
   const checkPasswordResult = checkPassword(password.value);
@@ -62,7 +64,7 @@ async function register() {
   }
 
   const registerResponse = await registerApi({
-    email: username.value,
+    email: email.value,
     password: password.value,
   });
   if (registerResponse.isErr()) {
@@ -87,10 +89,10 @@ async function register() {
     </template>
     <FlexCard>
       <div :style="{ margin: '25px' }">
-        <ElInput v-model="username" placeholder="用户名" :style="{ marginBottom: '15px' }">
+        <ElInput v-model="email" placeholder="Email" :style="{ marginBottom: '15px' }">
           <template #suffix>
-            <p :style="{ color: 'var(--el-color-danger)' }" v-if="usernameInfo.isErr()">
-              {{ usernameInfo.unwrapErr().message }}
+            <p :style="{ color: 'var(--el-color-danger)' }" v-if="emailInfo.isErr()">
+              {{ emailInfo.unwrapErr().message }}
             </p>
           </template>
         </ElInput>
