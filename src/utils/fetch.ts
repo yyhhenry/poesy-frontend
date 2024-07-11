@@ -189,8 +189,9 @@ export async function tokenInfoApi(): Promise<Result<TokenInfo, Error>> {
 
 export async function registerApi(user: User): Promise<Result<void, Error>> {
   return (await post('/api/user/register', user, isMsgResponse, { skipAuth: true }))
-    .map((msg) => {
+    .andThen((msg) => {
       ElMessage.info(msg.msg);
+      return ok();
     });
 }
 
