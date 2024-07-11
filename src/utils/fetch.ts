@@ -1,8 +1,7 @@
 import { type Result, anyhow, safelyAsync, err, ok, safely } from '@yyhhenry/rust-result';
 import { isPartialUnknown, type Predicate } from '@/utils/types';
-import { useLocalStorage, useStorage } from '@vueuse/core';
 import { ElMessage } from 'element-plus';
-import { computed } from 'vue';
+import { useTypedStorage } from './typed-storage';
 
 type UrlLike = string | URL;
 
@@ -27,31 +26,7 @@ export function isTokenPair(u: unknown): u is TokenPair {
   );
 }
 
-export const tokenPairJSONStorage = useLocalStorage<string | undefined>('token-pair', undefined);
-export const tokenPairStorage = computed<TokenPair | undefined>({
-  get: () => {
-    const str = tokenPairJSONStorage.value;
-    if (!str) {
-      return undefined;
-    }
-    const tokenPairResult = safely(() => JSON.parse(str) as unknown);
-    if (tokenPairResult.isErr()) {
-      return undefined;
-    }
-    const tokenPair = tokenPairResult.unwrap();
-    if (!isTokenPair(tokenPair)) {
-      return undefined;
-    }
-    return tokenPair;
-  },
-  set: (value: TokenPair | undefined) => {
-    if (!value) {
-      tokenPairJSONStorage.value = undefined;
-      return;
-    }
-    tokenPairJSONStorage.value = JSON.stringify(value);
-  }
-});
+export const tokenPairStorage = useTypedStorage('token-pair', isTokenPair);
 export function putTokenPair(tokenPair: TokenPair): void {
   tokenPairStorage.value = tokenPair;
 }
