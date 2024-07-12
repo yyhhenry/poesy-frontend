@@ -57,7 +57,7 @@ async function verify() {
     </template>
     <FlexCard>
       <div :style="{ margin: '25px' }">
-        <ElInput :show-password="true" v-model="code" placeholder="验证码" :style="{ marginBottom: '15px' }">
+        <ElInput v-model="code" placeholder="验证码" :style="{ marginBottom: '15px' }">
           <template #suffix>
             <p :style="{ color: 'var(--el-color-danger)' }" v-if="codeInfo.isErr()">
               {{ codeInfo.unwrapErr().message }}
