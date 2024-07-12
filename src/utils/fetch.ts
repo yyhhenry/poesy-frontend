@@ -80,8 +80,9 @@ export function isErrorResponse(u: unknown): u is ErrorResponse {
 
 export interface PostOptions {
   skipAuth?: boolean;
+  formData?: boolean;
 }
-export async function post<T>(url: UrlLike, bodyJson: unknown, isT: Predicate<T>, options?: PostOptions): Promise<Result<T, Error>> {
+export async function post<T>(url: UrlLike, content: unknown | FormData, isT: Predicate<T>, options?: PostOptions): Promise<Result<T, Error>> {
   return await safelyAsync(async () => {
     let auth = '';
     if (!options?.skipAuth) {
@@ -91,14 +92,14 @@ export async function post<T>(url: UrlLike, bodyJson: unknown, isT: Predicate<T>
       }
       auth = `Bearer ${accessToken.unwrap()}`;
     }
-    const response = await fetch(url, {
-      method: 'POST',
-      body: JSON.stringify(bodyJson),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': auth,
-      },
-    });
+    const body = options?.formData && content instanceof FormData ? content : JSON.stringify(content);
+    const headers: HeadersInit = {
+      'Authorization': auth,
+    };
+    if (!options?.formData) {
+      headers['Content-Type'] = 'application/json';
+    }
+    const response = await fetch(url, { method: 'POST', body, headers });
     const json = (await response.json()) as unknown;
     if (response.status !== 200) {
       const errorText = `HTTP ${response.status} ${response.statusText}`;
