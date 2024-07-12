@@ -19,6 +19,11 @@ const router = createRouter({
       name: 'verify',
       component: () => import('@/views/VerifyView.vue'),
     },
+    {
+      path: '/upload-image',
+      name: 'upload-image',
+      component: () => import('@/views/TestUploadImageView.vue'),
+    },
   ],
 });
 
