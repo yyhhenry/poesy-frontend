@@ -8,13 +8,18 @@ import { anyhow } from '@yyhhenry/rust-result';
 import { tokenPairStorage } from '@/utils/fetch';
 import { UploadFilled } from '@element-plus/icons-vue';
 import { uploadImageApi } from '@/utils/image';
-import { ref } from 'vue';
+import { useTypedStorage } from '@/utils/typed-storage';
+import { isStringArray } from '@/utils/types';
 
 const info = computedAsync(() => {
   tokenPairStorage.value;
   return tokenInfoApi();
 }, anyhow('获取用户信息中'));
-const imgList = ref<string[]>([]);
+const imgList = useTypedStorage('img-list', isStringArray);
+function pushImgList(url: string) {
+  imgList.value ??= [];
+  imgList.value.push(url);
+}
 </script>
 
 <template>
@@ -50,7 +55,7 @@ const imgList = ref<string[]>([]);
           return;
         }
         ElMessage.success('上传成功');
-        imgList.push(response.unwrap().url);
+        pushImgList(response.unwrap().url);
       }">
         <ElIcon class="el-icon--upload">
           <UploadFilled></UploadFilled>
@@ -60,7 +65,7 @@ const imgList = ref<string[]>([]);
         </div>
       </ElUpload>
     </FlexCard>
-    <FlexCard>
+    <FlexCard v-if="imgList !== undefined && imgList.length != 0">
       <ElImage v-for="url in imgList" :key="url" :src="url"></ElImage>
     </FlexCard>
   </PageLayout>

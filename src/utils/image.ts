@@ -21,6 +21,5 @@ export async function uploadImageApi(image: File): Promise<Result<UploadResponse
     }
     const formData = new FormData();
     formData.append('image', image);
-    console.log(formData, image);
     return await post('/api/image/upload', formData, isUploadResponse, { formData: true });
 }
