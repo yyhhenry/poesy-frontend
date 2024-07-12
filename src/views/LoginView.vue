@@ -3,7 +3,7 @@ import { loginApi, registerApi, userExistsApi, type User } from '@/utils/fetch';
 import { computedAsync, useDebounce, useStorage } from '@vueuse/core';
 import { PageLayout, FlexCard, HeaderText, SwitchDark, } from '@yyhhenry/element-extra';
 import { ok, err, type Result, anyhow } from '@yyhhenry/rust-result';
-import { ElButton, ElInput, ElMessage, ElSwitch, ElTabPane, ElTabs } from 'element-plus';
+import { ElButton, ElInput, ElMessage, ElTabPane, ElTabs } from 'element-plus';
 import { computed, ref } from 'vue';
 import { ArrowLeftBold } from '@element-plus/icons-vue';
 import { useRouter } from 'vue-router';

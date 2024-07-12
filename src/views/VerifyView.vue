@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { registerApi, userExistsApi, verifyApi } from '@/utils/fetch';
-import { computedAsync, useDebounce } from '@vueuse/core';
+import { verifyApi } from '@/utils/fetch';
+import { useDebounce } from '@vueuse/core';
 import { PageLayout, FlexCard, HeaderText, SwitchDark, } from '@yyhhenry/element-extra';
-import { ok, err, type Result, anyhow } from '@yyhhenry/rust-result';
+import { ok, type Result, anyhow } from '@yyhhenry/rust-result';
 import { ElButton, ElInput, ElMessage } from 'element-plus';
 import { computed, ref } from 'vue';
 import { ArrowLeftBold } from '@element-plus/icons-vue';
