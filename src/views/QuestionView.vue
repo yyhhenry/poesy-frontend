@@ -12,7 +12,7 @@ import MarkdownEditor from '@/components/MarkdownEditor.vue';
 import { useTypedStorage } from '@/utils/typed-storage';
 import { isString } from '@/utils/types';
 import UserInfoDropdown from '@/components/UserInfoDropdown.vue';
-import { getAnswersByQuestionApi, UploadAnswerApi } from '@/utils/answer';
+import { answerContentCache, getAnswersByQuestionApi, UploadAnswerApi } from '@/utils/answer';
 
 const router = useRouter();
 const route = useRoute();
@@ -43,7 +43,23 @@ const answers = computedAsync(async () => {
   return await getAnswersByQuestionApi(id);
 }, anyhow('回答加载中'));
 
-const answerContent = useTypedStorage('poesy-answer-content', isString);
+const answerContent = computed({
+  get: () => {
+    if (questionId.value.isErr()) {
+      return '';
+    }
+    const id = questionId.value.unwrap();
+    return answerContentCache.value?.[id] ?? '';
+  },
+  set: (value: string) => {
+    if (questionId.value.isErr()) {
+      return;
+    }
+    const id = questionId.value.unwrap();
+    answerContentCache.value ??= {};
+    answerContentCache.value[id] = value;
+  }
+});
 
 const answersTab = ref<'view-answers' | 'upload-answer'>('view-answers');
 

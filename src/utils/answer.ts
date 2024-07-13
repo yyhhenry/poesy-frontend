@@ -1,6 +1,7 @@
 import { get, post } from '@/utils/fetch';
 import { isArrayOf, isPartialUnknown } from './types';
 import { err, ok, type Result } from '@yyhhenry/rust-result';
+import { useTypedStorage } from './typed-storage';
 
 export interface UploadAnswerRequest {
     questionId: string;
@@ -55,3 +56,17 @@ export async function getAnswersByQuestionApi(
 ): Promise<Result<AnswerListResponse, Error>> {
     return await get(`/api/answer/by-question/${questionId}`, isAnswerListResponse, { skipAuth: true });
 }
+
+
+export interface AnswerContentCache {
+    [answerId: string]: string;
+}
+
+export function isAnswerContentCache(value: unknown): value is AnswerContentCache {
+    return (
+        isPartialUnknown<AnswerContentCache>(value) &&
+        Object.keys(value).every((key) => typeof key === 'string' && typeof value[key] === 'string')
+    );
+}
+
+export const answerContentCache = useTypedStorage('poesy-answer-content', isAnswerContentCache);
