@@ -5,7 +5,7 @@ import { uploadImageApi } from '@/utils/image';
 import { useTypedStorage } from '@/utils/typed-storage';
 import { isString } from '@/utils/types';
 import MdBox from '@/components/MdBox.vue';
-import { computed } from 'vue';
+import { computed, ref, watch, watchEffect } from 'vue';
 
 const props = defineProps<{
   modelValue: string | undefined;
@@ -15,13 +15,23 @@ const emit = defineEmits<{
   'update:modelValue': [string];
 }>();
 
+const editorTab = ref<'markdown' | 'preview'>('markdown');
+
+
 const editorContent = computed({
   get: () => props.modelValue ?? '',
   set: (value: string) => emit('update:modelValue', value),
 });
 
-const title = useTypedStorage('poesy-editor-title', isString);
-
+watch(
+  () => editorContent.value,
+  (newValue, oldValue) => {
+    if (newValue === '' && oldValue !== '') {
+      editorTab.value = 'markdown';
+    }
+  },
+  { immediate: true }
+);
 function pushImage(url: string) {
   const urlObj = new URL(url, window.location.href);
   const filename = urlObj.pathname.split('/').pop();
@@ -33,8 +43,8 @@ const fontFamily = 'Consolas, Monaco, \" Andale Mono\", \"Ubuntu Mono\" , monosp
 </script>
 
 <template>
-  <ElTabs>
-    <ElTabPane label="Markdown">
+  <ElTabs v-model="editorTab">
+    <ElTabPane label="Markdown代码" name="markdown">
       <ElInput v-model="editorContent" type="textarea" :style="{
         fontFamily
       }" :autosize="true"></ElInput>
@@ -56,7 +66,7 @@ const fontFamily = 'Consolas, Monaco, \" Andale Mono\", \"Ubuntu Mono\" , monosp
         </div>
       </ElUpload>
     </ElTabPane>
-    <ElTabPane label="Preview">
+    <ElTabPane label="预览" name="preview">
       <MdBox :content="editorContent ?? ''"></MdBox>
     </ElTabPane>
   </ElTabs>
