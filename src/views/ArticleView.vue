@@ -1,19 +1,15 @@
 <script setup lang="ts">
 import { computedAsync } from '@vueuse/core';
-import { PageLayout, FlexCard, HeaderText, SwitchDark, FlexBox, } from '@yyhhenry/element-extra';
+import { PageLayout, FlexCard, HeaderText, SwitchDark, FlexBox } from '@yyhhenry/element-extra';
 import { ok, type Result, anyhow } from '@yyhhenry/rust-result';
-import { ElButton, ElTabPane, ElTabs } from 'element-plus';
-import { computed } from 'vue';
-import { DocumentAdd, HomeFilled } from '@element-plus/icons-vue';
-import { useRoute, useRouter } from 'vue-router';
-import { getArticleApi } from '@/utils/article';
+import { ElButton, ElDivider, ElInput, ElMessage } from 'element-plus';
+import { computed, ref } from 'vue';
+import { HomeFilled } from '@element-plus/icons-vue';
+import { useRoute } from 'vue-router';
+import { getArticleApi, getArticleCommentsApi, uploadArticleCommentApi } from '@/utils/article';
 import MdBox from '@/components/MdBox.vue';
-import MarkdownEditor from '@/components/MarkdownEditor.vue';
-import { useTypedStorage } from '@/utils/typed-storage';
-import { isString } from '@/utils/types';
 import UserInfoDropdown from '@/components/UserInfoDropdown.vue';
 
-const router = useRouter();
 const route = useRoute();
 const articleId = computed((): Result<string, Error> => {
   const id = route.query.id;
@@ -30,6 +26,35 @@ const article = computedAsync(async () => {
   const id = articleId.value.unwrap();
   return await getArticleApi(id);
 }, anyhow('文章加载中'));
+
+const uploadCommentCount = ref(0);
+
+const comments = computedAsync(async () => {
+  uploadCommentCount.value; // trigger reactivity
+  if (articleId.value.isErr()) {
+    return anyhow(articleId.value.unwrapErr().message);
+  }
+  const id = articleId.value.unwrap();
+  return await getArticleCommentsApi(id);
+}, anyhow('评论加载中'));
+
+
+const commentContent = ref('');
+
+async function uploadComment() {
+  if (articleId.value.isErr()) {
+    return;
+  }
+  const content = commentContent.value;
+  if (content === '') {
+    ElMessage.error('评论内容不能为空');
+    return;
+  }
+  const id = articleId.value.unwrap();
+  await uploadArticleCommentApi(id, content);
+  commentContent.value = '';
+  uploadCommentCount.value++;
+}
 </script>
 
 <template>
@@ -70,6 +95,37 @@ const article = computedAsync(async () => {
         {{ article.unwrapErr().message }}
       </HeaderText>
     </FlexCard>
+    <FlexCard v-if="comments.isOk()">
+      <ElInput v-model="commentContent" :placeholder="'写下你的评论'">
+        <template #append>
+          <ElButton :type="'primary'" @click="uploadComment">评论</ElButton>
+        </template>
+      </ElInput>
+      <div v-for="comment in comments.unwrap().comments" :key="comment.id">
+        <ElDivider></ElDivider>
+        <div>
+          <p>
+            <span>By </span>
+            <span class="by-user" @click="$router.push({
+              path: '/user/',
+              query: {
+                email: comment.authorEmail,
+              }
+            })">
+              {{ comment.authorEmail }}
+            </span>
+            <span> | </span>
+            <span>{{ new Date(comment.createdTime).toLocaleString() }}</span>
+          </p>
+          <p :style="{ marginLeft: '20px', marginTop: '10px' }">{{ comment.content }}</p>
+        </div>
+      </div>
+      <div v-if="comments.unwrap().comments.length === 0">
+      </div>
+    </FlexCard>
+    <FlexBox v-else>
+      <p :style="{ margin: '25px' }">{{ comments.unwrapErr().message }}</p>
+    </FlexBox>
     <div :style="{
       height: '90vh',
     }">
