@@ -57,17 +57,14 @@
 
 <script lang="ts" setup>
 import { defineComponent, ref } from 'vue';
-import {ElCard} from 'element-plus'
-import GPTClient from '@/gpt-api';
+import { ElCard, ElMessage } from 'element-plus';
+import { ChatWithQwen } from '@/utils/qwen'; 
 
-const gptClient = new GPTClient();
 const userInput = ref('');
-
 const messages = ref([
     {
         role: 'user',
-        content:
-            '你是一个ai',
+        content: '你是一个ai',
     },
     {
         role: 'system',
@@ -75,80 +72,34 @@ const messages = ref([
     },
 ]);
 
+
+const getHistory = () => {
+    return messages.value.map(m => m.content);
+};
+
 const submitMessage = async () => {
     if (!userInput.value.trim()) return;
-    messages.value.push({ role: 'user', content: userInput.value });
+    const userMessage = userInput.value.trim();
+    messages.value.push({ role: 'user', content: userMessage });
     userInput.value = '';
+
     try {
-        const gptResponse = await gptClient.askGPT(messages.value);
-        messages.value.push({
-            role : 'assistant',
-            content : gptResponse!.content,
-        });
+        const history = getHistory();
+        const gptResponse = await ChatWithQwen(userMessage, history, true);
+        if (gptResponse.isOk()) {
+            messages.value.push({
+                role: 'assistant',
+                content: gptResponse.value,
+            });
+        } else {
+            throw new Error(gptResponse.error.toString());
+        }
     } catch (error) {
         messages.value.push({
             role: 'system',
-            content: 'Error: Unable to fetch response from AI.',
+            content: `Error: ${error.message}`,
         });
+        console.error('Error fetching response from AI:', error);
     }
 };
 </script>
-
-<style scoped>
-.ai-customer-service {
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.custom-card {
-    display: flex;
-    align-items: center;
-    height: 100%;
-}
-.chat {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-}
-
-.message-icon {
-    width: 35px;
-    height: 35px;
-    margin: 4px;
-}
-
-.messages {
-    flex-grow: 1;
-    overflow-y: auto;
-    padding: 16px;
-}
-
-.message.user .content,
-.message.assistant .content,
-.message.system .content {
-    background-color: #f0f0f0;
-    padding: 5px 10px;
-    border-radius: 5px;
-}
-
-.message {
-    margin-bottom: 8px;
-}
-
-.user {
-    text-align: right;
-}
-
-.input-area {
-    display: flex;
-    padding: 8px;
-}
-
-input {
-    flex-grow: 1;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-</style>

@@ -25,19 +25,19 @@ export async function askQwen(
     return (await requestPromise).map((response) => response.response);
 }
 
-// Enhanced to handle conversation history
+
 export async function ChatWithQwen(
     prompt: string,
-    history: string[] = [], // Array of previous dialogues
+    history: string[] = [], 
     info?: boolean,
 ): Promise<Result<string, Error>> {
-    const requestPayload = { prompt, history }; // Include history in the request
+    const requestPayload = { prompt, history }; 
     const requestPromise = post('/api/qwen/answer', requestPayload, isQwenResponse);
     if (info === true) {
         ElMessage.info('正在等待Qwen的回答...');
     }
     return (await requestPromise).map((response) => {
-        history.push(prompt, response.response); // Update history with the new interaction
+        history.push(prompt, response.response); 
         return response.response;
     });
 }
