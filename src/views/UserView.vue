@@ -7,6 +7,7 @@ import { computed } from 'vue';
 import { HomeFilled } from '@element-plus/icons-vue';
 import { useRoute } from 'vue-router';
 import { getQuestionsByApi } from '@/utils/question';
+import { getArticlesByApi } from '@/utils/article';
 import UserInfoDropdown from '@/components/UserInfoDropdown.vue';
 
 const route = useRoute();
@@ -23,7 +24,14 @@ const questionBriefs = computedAsync(async () => {
   }
   const userEmail = email.value.unwrap();
   return await getQuestionsByApi(userEmail);
-}, anyhow('文章加载中'));
+}, anyhow('问题列表加载中'));
+const articleBriefs = computedAsync(async () => {
+  if (email.value.isErr()) {
+    return anyhow(email.value.unwrapErr().message);
+  }
+  const userEmail = email.value.unwrap();
+  return await getArticlesByApi(userEmail);
+}, anyhow('文章列表加载中'));
 </script>
 
 <template>
@@ -67,6 +75,27 @@ const questionBriefs = computedAsync(async () => {
           </div>
         </ElTabPane>
         <ElTabPane label="TA的文章">
+          <div v-if="articleBriefs.isOk()">
+            <div v-for="articleBrief of articleBriefs.unwrap().articleBriefs" :key="articleBrief.id">
+              <FlexCard>
+                <HeaderText class="brief" @click="$router.push({
+                  path: '/article/',
+                  query: {
+                    id: articleBrief.id,
+                  }
+                })">
+                  <span>文章：{{ articleBrief.title }}</span>
+                </HeaderText>
+                <p :style="{ marginTop: '10px' }">{{ new Date(articleBrief.createdTime).toLocaleString() }}</p>
+              </FlexCard>
+            </div>
+            <div v-if="articleBriefs.unwrap().articleBriefs.length === 0">
+              <p :style="{ margin: '15px' }">TA还没有文章</p>
+            </div>
+          </div>
+          <div v-else>
+            <p>{{ articleBriefs.unwrapErr().message }}</p>
+          </div>
         </ElTabPane>
       </ElTabs>
     </FlexBox>
