@@ -2,6 +2,7 @@ import { type Result, anyhow, safelyAsync, err, ok, safely } from '@yyhhenry/rus
 import { isPartialUnknown, type Predicate } from '@/utils/types';
 import { ElMessage } from 'element-plus';
 import { useTypedStorage } from './typed-storage';
+import { computedAsync } from '@vueuse/core';
 
 type UrlLike = string | URL;
 
@@ -214,3 +215,7 @@ export async function verifyApi(email: string, code: string): Promise<Result<voi
   return (await post('/api/user/verify', { email, code } satisfies VerifyRequest, isTokenPair, { skipAuth: true }))
     .map(putTokenPair);
 }
+export const userInfo = computedAsync(() => {
+  tokenPairStorage.value; // trigger reactivity
+  return tokenInfoApi();
+}, anyhow('获取用户信息中'));
