@@ -137,7 +137,6 @@ const submitMessage = async () => {
 .message.user .content,
 .message.assistant .content,
 .message.system .content {
-    background-color: #f0f0f0;
     padding: 5px 10px;
     border-radius: 5px;
 }
@@ -158,7 +157,6 @@ const submitMessage = async () => {
 input {
     flex-grow: 1;
     padding: 8px;
-    border: 1px solid #ccc;
     border-radius: 4px;
 }
 </style>
