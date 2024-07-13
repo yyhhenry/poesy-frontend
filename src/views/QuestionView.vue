@@ -32,7 +32,10 @@ const question = computedAsync(async () => {
   return await getQuestionApi(id);
 }, anyhow('问题加载中'));
 
+const uploadCount = ref(0);
+
 const answers = computedAsync(async () => {
+  uploadCount.value; // trigger reactivity
   if (questionId.value.isErr()) {
     return anyhow(questionId.value.unwrapErr().message);
   }
@@ -67,6 +70,7 @@ async function uploadAnswer() {
   }
   answersTab.value = 'view-answers';
   answerContent.value = '';
+  uploadCount.value++;
 }
 </script>
 
