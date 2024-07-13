@@ -3,6 +3,7 @@
       <template #header>
         <HeaderText>{{ websiteName }}</HeaderText>
       </template>
+      
       <template #header-extra>
         <ElDropdown v-if="info.isOk()" :style="{ margin: '10px' }">
           <HeaderText :font-size="'12pt'" :style="{ cursor: 'pointer' }">
@@ -20,8 +21,18 @@
         </span>
   
         <SwitchDark></SwitchDark>
+        
       </template>
-      
+      <template>
+      <el-drawer
+        v-model="drawer"
+        title="I am the title"
+        :direction="direction"
+        :before-close="handleClose"
+    >
+    <span>Hi, there!</span>
+    </el-drawer>
+      </template>
       <Chat />
 
     </PageLayout>
@@ -30,6 +41,7 @@
 
 
 <script lang="ts" setup>
+import Chat from '@/components/ChatQianWen.vue';
 import {
   PageLayout,
   FlexCard,
@@ -50,7 +62,6 @@ import { computedAsync } from '@vueuse/core';
 import { tokenInfoApi, logoutApi } from '@/utils/fetch';
 import { anyhow, type Result } from '@yyhhenry/rust-result';
 import { tokenPairStorage } from '@/utils/fetch';
-import Chat from '@/components/ChatQianWen.vue';
 import {
   getQwenRole,
   qwenGreeting,
@@ -64,6 +75,7 @@ const info = computedAsync(() => {
   tokenPairStorage.value;
   return tokenInfoApi();
 }, anyhow('获取用户信息中'));
+const drawer = ref(false)
 </script>
 
 <style scoped>
