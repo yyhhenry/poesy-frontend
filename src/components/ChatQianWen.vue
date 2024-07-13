@@ -9,36 +9,26 @@
                 >
                     <div v-if="index >= 1">
                         <div
-                            v-if="
-                                message.role === 'assistant' ||
-                                message.role === 'system'
-                            "
+                            v-if="message.role === 'assistant' || message.role === 'system'"
+                            class="message-bubble assistant-bubble"
                         >
-                            <ElCard class="custom-card">
-                                <span>
-                                    <img
-                                        src="@/assets/icons/ai.png"
-                                        alt="AI Icon"
-                                        class="message-icon"
-                                    />
-                                </span>
-
-                                <span class="content">
-                                    {{ message.content }}
-                                </span>
-                            </ElCard>
+                            <img
+                                src="@/assets/icons/ai.png"
+                                alt="AI Icon"
+                                class="message-icon"
+                            />
+                            <span class="content-bubble">{{ message.content }}</span>
                         </div>
-                        <div v-if="message.role === 'user'">
-                            <ElCard>
-                                <span class="content">{{
-                                    message.content
-                                }}</span>
-                                <img
-                                    src="@/assets/icons/user.png"
-                                    alt="User Icon"
-                                    class="message-icon"
-                                />
-                            </ElCard>
+                        <div
+                            v-if="message.role === 'user'"
+                            class="message-bubble user-bubble"
+                        >
+                            <span class="content-bubble">{{ message.content }}</span>
+                            <img
+                                src="@/assets/icons/user.png"
+                                alt="User Icon"
+                                class="message-icon"
+                            />
                         </div>
                     </div>
                 </div>
@@ -54,6 +44,56 @@
         </div>
     </div>
 </template>
+
+<style>
+.chat {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.messages {
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+.message-bubble {
+    display: flex;
+    align-items: center;
+    margin: 10px;
+    flex-wrap: nowrap;
+}
+
+.assistant-bubble {
+    justify-content: flex-start;
+}
+
+.user-bubble {
+    justify-content: flex-end;
+    text-align: right;
+}
+
+.content-bubble {
+    padding: 8px 12px;
+    border-radius: 15px;
+    max-width: 70%;
+}
+
+.assistant-bubble .content-bubble {
+    background-color: var(--el-bg-color);
+}
+
+.user-bubble .content-bubble {
+    background-color: var(--el-color-primary);
+    color: white;
+}
+
+.message-icon {
+    width: 24px;
+    height: 24px;
+}
+
+</style>
 
 <script lang="ts" setup>
 import { defineComponent, ref } from 'vue';
@@ -97,7 +137,7 @@ const submitMessage = async () => {
     } catch (error) {
         messages.value.push({
             role: 'system',
-            content: `Error: ${error.message}`,
+            content: `${error.message}`,
         });
         console.error('Error fetching response from AI:', error);
     }
