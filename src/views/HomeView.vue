@@ -78,7 +78,7 @@ onMounted(loadMoreQuestions);
       <HeaderText>{{ websiteName }}</HeaderText>
     </template>
     <template #header-extra>
-      <HeaderText>
+      <HeaderText v-if="userInfo.isOk()">
         <ElButton :type="'primary'" :size="'large'" :circle="true" :icon="Plus" @click="$router.push('/editor')">
         </ElButton>
       </HeaderText>
@@ -136,7 +136,8 @@ onMounted(loadMoreQuestions);
           alignItems: 'center',
           height: '60px',
         }">
-          <ElButton @click="loadMoreQuestions" :type="'primary'" :plain="true" :circle="true" :icon="Refresh">
+          <ElButton @click="loadMoreQuestions" :type="'primary'" :plain="true" :icon="Refresh">
+            加载更多
           </ElButton>
         </div>
       </div>

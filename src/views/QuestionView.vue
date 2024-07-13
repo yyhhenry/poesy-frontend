@@ -11,6 +11,7 @@ import MdBox from '@/components/MdBox.vue';
 import MarkdownEditor from '@/components/MarkdownEditor.vue';
 import { useTypedStorage } from '@/utils/typed-storage';
 import { isString } from '@/utils/types';
+import UserInfoDropdown from '@/components/UserInfoDropdown.vue';
 
 const router = useRouter();
 const route = useRoute();
@@ -41,10 +42,11 @@ const answerContent = useTypedStorage('poesy-answer-content', isString);
       </HeaderText>
       <HeaderText>
         <span>Poesy - 问题：</span>
-        <span v-if="question.isOk()">{{ question.unwrap().title }}</span>
+        <span v-if="question.isOk()" :style="{ userSelect: 'all' }">{{ question.unwrap().title }}</span>
       </HeaderText>
     </template>
     <template #header-extra>
+      <UserInfoDropdown></UserInfoDropdown>
       <SwitchDark></SwitchDark>
     </template>
     <FlexCard v-if="question.isOk()">

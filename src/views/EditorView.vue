@@ -16,14 +16,7 @@ const router = useRouter();
 const title = useTypedStorage('poesy-editor-title', isString);
 const editorContent = useTypedStorage('poesy-editor-content', isString);
 
-async function submit(type: 'question' | 'article') {
-  const typeCn = type === 'question' ? '提问' : '文章';
-  const confirmResult = await safelyAsync(() => ElMessageBox.confirm(`确定要添加为${typeCn}吗？`, '提交', {
-    type: 'warning',
-  }));
-  if (confirmResult.isErr()) {
-    return;
-  }
+async function submit(submitType: '提问' | '文章') {
   const titleValue = title.value ?? '';
   const editorContentValue = editorContent.value ?? '';
   if (titleValue === '') {
@@ -34,7 +27,13 @@ async function submit(type: 'question' | 'article') {
     ElMessage.error('内容不能为空');
     return;
   }
-  if (type === 'question') {
+  const confirmResult = await safelyAsync(() => ElMessageBox.confirm(`确定要添加为${submitType}吗？`, '提交', {
+    type: 'warning',
+  }));
+  if (confirmResult.isErr()) {
+    return;
+  }
+  if (submitType === '提问') {
     const response = await uploadQuestionApi(titleValue, editorContentValue);
     if (response.isErr()) {
       ElMessage.error(response.unwrapErr().message);
@@ -69,8 +68,8 @@ async function submit(type: 'question' | 'article') {
       <SwitchDark></SwitchDark>
     </template>
     <FlexCard>
-      <ElButton :icon="Search" :type="'danger'" :plain="true" @click="submit('question')">添加为提问</ElButton>
-      <ElButton :icon="DocumentAdd" :type="'primary'" :plain="true">发布为文章</ElButton>
+      <ElButton :icon="Search" :type="'danger'" :plain="true" @click="submit('提问')">添加为提问</ElButton>
+      <ElButton :icon="DocumentAdd" :type="'primary'" :plain="true" @click="submit('文章')">发布为文章</ElButton>
       <ElInput v-model="title" :style="{ marginTop: '15px' }">
         <template #prepend>
           <span>标题</span>

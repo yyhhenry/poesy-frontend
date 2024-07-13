@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { computedAsync, useDebounce } from '@vueuse/core';
+import { computedAsync } from '@vueuse/core';
 import { PageLayout, FlexCard, HeaderText, SwitchDark, FlexBox, } from '@yyhhenry/element-extra';
 import { ok, type Result, anyhow } from '@yyhhenry/rust-result';
-import { ElButton, ElInput, ElMessage, ElTabPane, ElTabs } from 'element-plus';
-import { computed, ref } from 'vue';
-import { ArrowLeftBold, HomeFilled } from '@element-plus/icons-vue';
-import { useRoute, useRouter } from 'vue-router';
+import { ElButton, ElTabPane, ElTabs } from 'element-plus';
+import { computed } from 'vue';
+import { HomeFilled } from '@element-plus/icons-vue';
+import { useRoute } from 'vue-router';
 import { getQuestionsByApi } from '@/utils/question';
+import UserInfoDropdown from '@/components/UserInfoDropdown.vue';
 
 const route = useRoute();
 const email = computed((): Result<string, Error> => {
@@ -31,9 +32,13 @@ const questionBriefs = computedAsync(async () => {
       <HeaderText>
         <ElButton :type="'danger'" :plain="true" :icon="HomeFilled" @click="$router.push('/')"></ElButton>
       </HeaderText>
-      <HeaderText>用户 - {{ email.isOk() ? email.unwrap() : email.unwrapErr().message }}</HeaderText>
+      <HeaderText>
+        <span>用户 - </span>
+        <span :style="{ userSelect: 'all' }">{{ email.isOk() ? email.unwrap() : email.unwrapErr().message }}</span>
+      </HeaderText>
     </template>
     <template #header-extra>
+      <UserInfoDropdown></UserInfoDropdown>
       <SwitchDark></SwitchDark>
     </template>
     <FlexBox>

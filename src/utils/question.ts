@@ -40,7 +40,7 @@ export function isQuestionResponse(value: unknown): value is QuestionResponse {
 }
 
 export async function getQuestionApi(id: string): Promise<Result<QuestionResponse, Error>> {
-    return await get(`/api/question/${id}`, isQuestionResponse);
+    return await get(`/api/question/${id}`, isQuestionResponse, { skipAuth: true });
 }
 
 export interface QuestionBrief {
@@ -74,11 +74,11 @@ export function isQuestionsResponse(value: unknown): value is QuestionsResponse 
 export async function getQuestionsByApi(email: string): Promise<Result<QuestionsResponse, Error>> {
     const url = new URL('/api/question/by-user', window.location.href);
     url.searchParams.append('email', email);
-    return await get(url, isQuestionsResponse);
+    return await get(url, isQuestionsResponse, { skipAuth: true });
 }
 
 export async function getLatestQuestionsApi(offset?: number): Promise<Result<QuestionsResponse, Error>> {
     const url = new URL('/api/question/latest', window.location.href);
     url.searchParams.append('offset', `${offset ?? 0}`);
-    return await get(url, isQuestionsResponse);
+    return await get(url, isQuestionsResponse, { skipAuth: true });
 }
