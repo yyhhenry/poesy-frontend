@@ -11,6 +11,7 @@ import { uploadQuestionApi } from '@/utils/question';
 import { useRouter } from 'vue-router';
 import MarkdownEditor from '@/components/MarkdownEditor.vue';
 import { safelyAsync } from '@yyhhenry/rust-result';
+import { uploadArticleApi } from '@/utils/article';
 
 const router = useRouter();
 const title = useTypedStorage('poesy-editor-title', isString);
@@ -50,7 +51,21 @@ async function submit(submitType: '提问' | '文章') {
       });
     }
   } else {
-    ElMessage.error('暂未实现');
+    const response = await uploadArticleApi(titleValue, editorContentValue);
+    if (response.isErr()) {
+      ElMessage.error(response.unwrapErr().message);
+    } else {
+      ElMessage.success('发布成功');
+      title.value = '';
+      editorContent.value = '';
+      const articleId = response.unwrap().id;
+      router.push({
+        path: '/article/',
+        query: {
+          id: articleId,
+        },
+      });
+    }
   }
 }
 </script>
