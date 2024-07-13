@@ -5,9 +5,20 @@ import {
   ElDropdown,
   ElDropdownItem,
   ElDropdownMenu,
+  ElMessageBox,
 } from 'element-plus';
 import { logoutApi } from '@/utils/fetch';
 import { userInfo } from '@/utils/fetch';
+
+async function attemptLogout() {
+  await ElMessageBox.confirm('确定要退出吗？', '提示', {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type: 'warning',
+  }).then(async () => {
+    await logoutApi();
+  });
+}
 </script>
 
 <template>
@@ -17,12 +28,17 @@ import { userInfo } from '@/utils/fetch';
     </HeaderText>
     <template #dropdown>
       <ElDropdownMenu>
-        <ElDropdownItem @click="logoutApi"> 退出 </ElDropdownItem>
+        <ElDropdownItem @click="$router.push({
+          path: '/user/',
+          query: {
+            email: userInfo.unwrap().email,
+          }
+        })"> 个人信息 </ElDropdownItem>
+        <ElDropdownItem @click="attemptLogout"> 退出 </ElDropdownItem>
       </ElDropdownMenu>
     </template>
   </ElDropdown>
   <span v-else>
-    <span>{{ userInfo.unwrapErr().message }}</span>
     <ElButton :type="'primary'" :style="{ margin: '15px' }" @click="$router.push('/login')">登录/注册</ElButton>
   </span>
 </template>

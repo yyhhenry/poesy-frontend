@@ -115,14 +115,19 @@ export async function post<T>(url: UrlLike, content: unknown | FormData, isT: Pr
     return json;
   });
 }
-export async function get<T>(url: UrlLike, isT: Predicate<T>): Promise<Result<T, Error>> {
+export interface GetOptions {
+  skipAuth?: boolean;
+}
+export async function get<T>(url: UrlLike, isT: Predicate<T>, options?: GetOptions): Promise<Result<T, Error>> {
   return await safelyAsync(async () => {
-    const accessToken = await getAutoRefreshedToken();
-    if (accessToken.isErr()) {
-      throw accessToken.unwrapErr();
+    let auth = '';
+    if (!options?.skipAuth) {
+      const accessToken = await getAutoRefreshedToken();
+      if (accessToken.isErr()) {
+        throw accessToken.unwrapErr();
+      }
+      auth = `Bearer ${accessToken.unwrap()}`;
     }
-    const auth = `Bearer ${accessToken.unwrap()}`;
-
     const response = await fetch(url, {
       method: 'GET',
       headers: {

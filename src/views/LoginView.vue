@@ -5,7 +5,7 @@ import { PageLayout, FlexCard, HeaderText, SwitchDark, } from '@yyhhenry/element
 import { ok, err, type Result, anyhow } from '@yyhhenry/rust-result';
 import { ElButton, ElInput, ElMessage, ElTabPane, ElTabs } from 'element-plus';
 import { computed, ref } from 'vue';
-import { ArrowLeftBold } from '@element-plus/icons-vue';
+import { HomeFilled } from '@element-plus/icons-vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
@@ -110,7 +110,7 @@ async function submit() {
   <PageLayout>
     <template #header>
       <HeaderText>
-        <ElButton :type="'danger'" :plain="true" :icon="ArrowLeftBold" @click="$router.push('/')"></ElButton>
+        <ElButton :type="'danger'" :plain="true" :icon="HomeFilled" @click="$router.push('/')"></ElButton>
       </HeaderText>
       <HeaderText>注册 / 登录</HeaderText>
 
