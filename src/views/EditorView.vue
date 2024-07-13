@@ -1,29 +1,29 @@
 <script setup lang="ts">
 import { PageLayout, FlexCard, HeaderText, SwitchDark, FlexBox, } from '@yyhhenry/element-extra';
-import { ElButton, ElIcon, ElInput, ElMessage, ElTabPane, ElTabs, ElUpload } from 'element-plus';
+import { ElButton, ElInput, ElMessage, ElMessageBox } from 'element-plus';
 import { websiteName } from '@/utils/website-name';
-import { ArrowLeftBold, DocumentAdd, Search, UploadFilled } from '@element-plus/icons-vue';
-import { uploadImageApi } from '@/utils/image';
+import { ArrowLeftBold, DocumentAdd, Search } from '@element-plus/icons-vue';
 import { useTypedStorage } from '@/utils/typed-storage';
 import { isString } from '@/utils/types';
 import UserInfoDropdown from '@/components/UserInfoDropdown.vue';
-import MdBox from '@/components/MdBox.vue';
+
 import { uploadQuestionApi } from '@/utils/question';
 import { useRouter } from 'vue-router';
+import MarkdownEditor from '@/components/MarkdownEditor.vue';
+import { safelyAsync } from '@yyhhenry/rust-result';
 
 const router = useRouter();
 const title = useTypedStorage('poesy-editor-title', isString);
 const editorContent = useTypedStorage('poesy-editor-content', isString);
 
-function pushImage(url: string) {
-  const urlObj = new URL(url, window.location.href);
-  const filename = urlObj.pathname.split('/').pop();
-  // Push markdown image syntax to the editor content
-  editorContent.value += `\n![${filename}](${url})`;
-}
-const fontFamily = 'Consolas, Monaco, \" Andale Mono\", \"Ubuntu Mono\" , monospace';
-
 async function submit(type: 'question' | 'article') {
+  const typeCn = type === 'question' ? '提问' : '文章';
+  const confirmResult = await safelyAsync(() => ElMessageBox.confirm(`确定要添加为${typeCn}吗？`, '提交', {
+    type: 'warning',
+  }));
+  if (confirmResult.isErr()) {
+    return;
+  }
   const titleValue = title.value ?? '';
   const editorContentValue = editorContent.value ?? '';
   if (titleValue === '') {
@@ -78,33 +78,7 @@ async function submit(type: 'question' | 'article') {
       </ElInput>
     </FlexCard>
     <FlexBox>
-      <ElTabs>
-        <ElTabPane label="Markdown">
-          <ElInput v-model="editorContent" type="textarea" :style="{
-            fontFamily
-          }" :autosize="true"></ElInput>
-          <ElUpload :style="{ marginTop: '20px' }" :drag="true" :accept="'.jpg,.jpeg,.png'" :show-file-list="false"
-            :http-request="async (options) => {
-              const response = await uploadImageApi(options.file);
-              if (response.isErr()) {
-                ElMessage.error(response.unwrapErr().message);
-                return;
-              }
-              ElMessage.success('上传成功');
-              pushImage(response.unwrap().url);
-            }">
-            <ElIcon class="el-icon--upload">
-              <UploadFilled></UploadFilled>
-            </ElIcon>
-            <div class="el-upload__text">
-              拖放图片到此处，或<em>点击上传</em>
-            </div>
-          </ElUpload>
-        </ElTabPane>
-        <ElTabPane label="Preview">
-          <MdBox :content="editorContent ?? ''"></MdBox>
-        </ElTabPane>
-      </ElTabs>
+      <MarkdownEditor v-model="editorContent"></MarkdownEditor>
     </FlexBox>
     <div :style="{
       height: '90vh',
