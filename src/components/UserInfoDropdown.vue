@@ -17,6 +17,12 @@ import { userInfo } from '@/utils/fetch';
     </HeaderText>
     <template #dropdown>
       <ElDropdownMenu>
+        <ElDropdownItem @click="$router.push({
+          path: '/user/',
+          query: {
+            email: userInfo.unwrap().email,
+          }
+        })"> 个人信息 </ElDropdownItem>
         <ElDropdownItem @click="logoutApi"> 退出 </ElDropdownItem>
       </ElDropdownMenu>
     </template>

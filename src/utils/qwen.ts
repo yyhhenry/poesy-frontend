@@ -54,5 +54,5 @@ export async function qwenGreeting(email: string): Promise<Result<string, Error>
         人设: role,
         时间: new Date().toLocaleString(),
     };
-    return await askQwen(JSON.stringify(requestJson), true);
+    return await askQwen(JSON.stringify(requestJson));
 }

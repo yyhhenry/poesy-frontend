@@ -2,7 +2,7 @@
 import { PageLayout, FlexCard, HeaderText, SwitchDark, FlexBox, } from '@yyhhenry/element-extra';
 import { ElButton, ElInput, ElMessage, ElMessageBox } from 'element-plus';
 import { websiteName } from '@/utils/website-name';
-import { ArrowLeftBold, DocumentAdd, Search } from '@element-plus/icons-vue';
+import { DocumentAdd, HomeFilled, Search } from '@element-plus/icons-vue';
 import { useTypedStorage } from '@/utils/typed-storage';
 import { isString } from '@/utils/types';
 import UserInfoDropdown from '@/components/UserInfoDropdown.vue';
@@ -60,7 +60,7 @@ async function submit(type: 'question' | 'article') {
   <PageLayout>
     <template #header>
       <HeaderText>
-        <ElButton :type="'danger'" :plain="true" :icon="ArrowLeftBold" @click="$router.push('/')"></ElButton>
+        <ElButton :type="'danger'" :plain="true" :icon="HomeFilled" @click="$router.push('/')"></ElButton>
       </HeaderText>
       <HeaderText>{{ websiteName }} - 编辑器</HeaderText>
     </template>

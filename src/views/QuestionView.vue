@@ -1,18 +1,16 @@
 <script setup lang="ts">
-import { verifyApi } from '@/utils/fetch';
-import { computedAsync, useDebounce } from '@vueuse/core';
+import { computedAsync } from '@vueuse/core';
 import { PageLayout, FlexCard, HeaderText, SwitchDark, FlexBox, } from '@yyhhenry/element-extra';
 import { ok, type Result, anyhow } from '@yyhhenry/rust-result';
-import { ElButton, ElInput, ElMessage, ElTabPane, ElTabs } from 'element-plus';
-import { computed, ref } from 'vue';
-import { ArrowLeftBold, DocumentAdd } from '@element-plus/icons-vue';
+import { ElButton, ElTabPane, ElTabs } from 'element-plus';
+import { computed } from 'vue';
+import { DocumentAdd, HomeFilled } from '@element-plus/icons-vue';
 import { useRoute, useRouter } from 'vue-router';
 import { getQuestionApi } from '../utils/question';
 import MdBox from '@/components/MdBox.vue';
 import MarkdownEditor from '@/components/MarkdownEditor.vue';
 import { useTypedStorage } from '@/utils/typed-storage';
 import { isString } from '@/utils/types';
-import { Header } from 'element-plus/es/components/table-v2/src/components/index.mjs';
 
 const router = useRouter();
 const route = useRoute();
@@ -39,7 +37,7 @@ const answerContent = useTypedStorage('poesy-answer-content', isString);
   <PageLayout>
     <template #header>
       <HeaderText>
-        <ElButton :type="'danger'" :plain="true" :icon="ArrowLeftBold" @click="$router.push('/')"></ElButton>
+        <ElButton :type="'danger'" :plain="true" :icon="HomeFilled" @click="$router.push('/')"></ElButton>
       </HeaderText>
       <HeaderText>
         <span>Poesy - 问题：</span>
@@ -53,7 +51,12 @@ const answerContent = useTypedStorage('poesy-answer-content', isString);
       <template #header>
         <HeaderText>
           <span>By </span>
-          <span class="by-user">
+          <span class="by-user" @click="$router.push({
+            path: '/user/',
+            query: {
+              email: question.unwrap().authorEmail,
+            }
+          })">
             {{ question.unwrap().authorEmail }}
           </span>
         </HeaderText>

@@ -71,14 +71,14 @@ export function isQuestionsResponse(value: unknown): value is QuestionsResponse 
     );
 }
 
-export async function getQuestionsBy(email: string): Promise<Result<QuestionsResponse, Error>> {
+export async function getQuestionsByApi(email: string): Promise<Result<QuestionsResponse, Error>> {
     const url = new URL('/api/question/by-user', window.location.href);
     url.searchParams.append('email', email);
     return await get(url, isQuestionsResponse);
 }
 
-export async function getLatestQuestions(offset?: number): Promise<Result<QuestionsResponse, Error>> {
+export async function getLatestQuestionsApi(offset?: number): Promise<Result<QuestionsResponse, Error>> {
     const url = new URL('/api/question/latest', window.location.href);
-    url.searchParams.append('start', `${offset ?? 0}`);
+    url.searchParams.append('offset', `${offset ?? 0}`);
     return await get(url, isQuestionsResponse);
 }

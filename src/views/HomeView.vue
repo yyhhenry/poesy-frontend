@@ -9,25 +9,21 @@ import {
 import {
   ElButton,
   ElDivider,
-  ElDropdown,
-  ElDropdownItem,
-  ElDropdownMenu,
+  ElMessage,
   ElMessageBox,
 } from 'element-plus';
 import { websiteName } from '@/utils/website-name';
-import { computedAsync } from '@vueuse/core';
-import { tokenInfoApi, logoutApi } from '@/utils/fetch';
 import { anyhow, type Result } from '@yyhhenry/rust-result';
 import { tokenPairStorage, userInfo } from '@/utils/fetch';
 import {
   getQwenRole,
   qwenGreeting,
-  qwenRole,
   toggleQwenRole,
 } from '@/utils/qwen';
-import { ref, watch, watchEffect } from 'vue';
-import { DocumentAdd, Plus, Refresh, UploadFilled } from '@element-plus/icons-vue';
+import { onMounted, ref, watch, watchEffect } from 'vue';
+import { Plus, Refresh } from '@element-plus/icons-vue';
 import UserInfoDropdown from '@/components/UserInfoDropdown.vue';
+import { getLatestQuestionsApi, type QuestionsResponse } from '@/utils/question';
 
 const greeting = ref<Result<string, Error>>(anyhow('Qwen的问候正在赶来'));
 
@@ -57,6 +53,23 @@ function attemptToggleQwenRole() {
     toggleQwenRole();
   });
 }
+const questionBriefs = ref<QuestionsResponse>({
+  questionBriefs: [],
+});
+async function loadMoreQuestions() {
+  const response = await getLatestQuestionsApi(questionBriefs.value.questionBriefs.length);
+  if (response.isErr()) {
+    ElMessage.error(response.unwrapErr().message);
+    return;
+  }
+  const newBriefs = response.unwrap().questionBriefs;
+  if (newBriefs.length === 0) {
+    ElMessage.info('没有更多问题了');
+    return;
+  }
+  questionBriefs.value.questionBriefs.push(...newBriefs);
+}
+onMounted(loadMoreQuestions);
 </script>
 
 <template>
@@ -92,5 +105,64 @@ function attemptToggleQwenRole() {
       </div>
       <ElDivider></ElDivider>
     </FlexBox>
+    <FlexBox>
+      <div>
+        <div v-for="questionBrief of questionBriefs.questionBriefs" :key="questionBrief.id">
+          <FlexCard>
+            <HeaderText class="brief" @click="$router.push({
+              path: '/question/',
+              query: {
+                id: questionBrief.id,
+              }
+            })">
+              <span>问题：{{ questionBrief.title }}</span>
+            </HeaderText>
+            <p :style="{ marginTop: '10px' }">
+              <span>By </span>
+              <span class="by-user" @click="$router.push({
+                path: '/user/',
+                query: {
+                  email: questionBrief.authorEmail,
+                }
+              })">{{ questionBrief.authorEmail }}</span>
+              <span> | </span>
+              <span> {{ new Date(questionBrief.createdTime).toLocaleString() }}</span>
+            </p>
+          </FlexCard>
+        </div>
+        <div :style="{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '60px',
+        }">
+          <ElButton @click="loadMoreQuestions" :type="'primary'" :plain="true" :circle="true" :icon="Refresh">
+          </ElButton>
+        </div>
+      </div>
+    </FlexBox>
   </PageLayout>
 </template>
+<style scoped>
+.brief {
+  border-bottom: 1px dashed var(--el-color-info);
+  transition: background-color 0.3s, border-bottom 0.3s;
+}
+
+.brief:hover {
+  cursor: pointer;
+  background-color: var(--el-color-info-lighten-5);
+  border-bottom: 1px solid var(--el-color-info);
+}
+
+.by-user {
+  border-bottom: 1px dashed var(--el-color-primary);
+  transition: color 0.3s, border-bottom 0.3s;
+}
+
+.by-user:hover {
+  cursor: pointer;
+  color: var(--el-color-primary);
+  border-bottom: 1px solid var(--el-color-primary);
+}
+</style>
