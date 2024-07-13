@@ -13,27 +13,27 @@
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",
-    "@vueuse/core": "^10.9.0",
+    "@vueuse/core": "^10.11.0",
     "@yyhhenry/element-extra": "^0.3.1",
     "@yyhhenry/rust-result": "^0.3.1",
-    "element-plus": "^2.7.6",
+    "element-plus": "^2.7.7",
     "highlight.js": "^11.10.0",
     "katex": "^0.16.11",
     "markdown-it": "^14.1.0",
-    "vue": "^3.4.29",
-    "vue-router": "^4.3.3"
+    "vue": "^3.4.31",
+    "vue-router": "^4.4.0"
   },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.4",
     "@types/katex": "^0.16.7",
     "@types/markdown-it": "^14.1.1",
-    "@types/node": "^20.14.5",
+    "@types/node": "^20.14.10",
     "@vitejs/plugin-vue": "^5.0.5",
     "@vue/tsconfig": "^0.5.1",
-    "npm-run-all2": "^6.2.0",
+    "npm-run-all2": "^6.2.2",
     "oxlint": "^0.6.0",
-    "typescript": "~5.4.0",
-    "vite": "^5.3.1",
-    "vue-tsc": "^2.0.21"
+    "typescript": "~5.4.5",
+    "vite": "^5.3.3",
+    "vue-tsc": "^2.0.26"
   }
 }
