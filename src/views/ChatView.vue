@@ -8,7 +8,7 @@
 </template>
 
 <script lang="ts" setup>
-import Chat from '@/components/Chat.vue';
+import Chat from '@/components/ChatQianWen.vue';
 </script>
 
 <style scoped>
