@@ -21,7 +21,7 @@ import {
   toggleQwenRole,
 } from '@/utils/qwen';
 import { onMounted, ref, watch, watchEffect } from 'vue';
-import { Plus, Refresh } from '@element-plus/icons-vue';
+import { ChatDotRound, Plus, Refresh } from '@element-plus/icons-vue';
 import UserInfoDropdown from '@/components/UserInfoDropdown.vue';
 import { getLatestQuestionsApi, type QuestionsResponse } from '@/utils/question';
 
@@ -87,10 +87,18 @@ onMounted(loadMoreQuestions);
     </template>
     <FlexCard v-if="greeting.isOk()">
       <template #header>
-        <span :style="{ margin: '15px' }"> Qwen的问候 </span>
-        <ElButton @click="refreshGreeting" :type="'primary'" :plain="true" :circle="true" :icon="Refresh"></ElButton>
-        <ElButton :style="{}" @click="attemptToggleQwenRole" :type="'info'" :text="true">当前人设：{{ getQwenRole() }}
-        </ElButton>
+        <div :style="{ display: 'flex', justifyContent: 'space-between' }">
+          <span>
+            <span :style="{ margin: '15px' }"> Qwen的问候 </span>
+            <ElButton @click="refreshGreeting" :type="'primary'" :plain="true" :circle="true" :icon="Refresh">
+            </ElButton>
+            <ElButton @click="attemptToggleQwenRole" :type="'info'" :text="true">当前人设：{{ getQwenRole() }}
+            </ElButton>
+          </span>
+          <span>
+            <ElButton @click="$router.push('/chat')" :type="'info'" :icon="ChatDotRound">开始聊天</ElButton>
+          </span>
+        </div>
       </template>
       <p>{{ greeting.unwrap() }}</p>
     </FlexCard>
