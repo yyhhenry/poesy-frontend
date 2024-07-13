@@ -40,6 +40,8 @@ async function submit(type: 'question' | 'article') {
       ElMessage.error(response.unwrapErr().message);
     } else {
       ElMessage.success('提问成功');
+      title.value = '';
+      editorContent.value = '';
       const questionId = response.unwrap().id;
       router.push({
         path: '/question/',
@@ -49,9 +51,8 @@ async function submit(type: 'question' | 'article') {
       });
     }
   } else {
-    // Submit as article
+    ElMessage.error('暂未实现');
   }
-  return true;
 }
 </script>
 
