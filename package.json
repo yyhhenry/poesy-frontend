@@ -17,11 +17,16 @@
     "@yyhhenry/element-extra": "^0.3.1",
     "@yyhhenry/rust-result": "^0.3.1",
     "element-plus": "^2.7.6",
+    "highlight.js": "^11.10.0",
+    "katex": "^0.16.11",
+    "markdown-it": "^14.1.0",
     "vue": "^3.4.29",
     "vue-router": "^4.3.3"
   },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.4",
+    "@types/katex": "^0.16.7",
+    "@types/markdown-it": "^14.1.1",
     "@types/node": "^20.14.5",
     "@vitejs/plugin-vue": "^5.0.5",
     "@vue/tsconfig": "^0.5.1",

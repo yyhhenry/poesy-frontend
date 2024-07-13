@@ -18,7 +18,7 @@ import { websiteName } from '@/utils/website-name';
 import { computedAsync } from '@vueuse/core';
 import { tokenInfoApi, logoutApi } from '@/utils/fetch';
 import { anyhow, type Result } from '@yyhhenry/rust-result';
-import { tokenPairStorage } from '@/utils/fetch';
+import { tokenPairStorage, userInfo } from '@/utils/fetch';
 import {
   getQwenRole,
   qwenGreeting,
@@ -26,12 +26,8 @@ import {
   toggleQwenRole,
 } from '@/utils/qwen';
 import { ref, watch, watchEffect } from 'vue';
-import { Refresh } from '@element-plus/icons-vue';
-
-const info = computedAsync(() => {
-  tokenPairStorage.value;
-  return tokenInfoApi();
-}, anyhow('获取用户信息中'));
+import { DocumentAdd, Plus, Refresh, UploadFilled } from '@element-plus/icons-vue';
+import UserInfoDropdown from '@/components/UserInfoDropdown.vue';
 
 const greeting = ref<Result<string, Error>>(anyhow('Qwen的问候正在赶来'));
 
@@ -43,13 +39,12 @@ watchEffect(() => {
 });
 
 async function refreshGreeting() {
-  const userInfo = info.value;
-  if (userInfo.isOk()) {
-    greeting.value = await qwenGreeting(userInfo.unwrap().email);
+  if (userInfo.value.isOk()) {
+    greeting.value = await qwenGreeting(userInfo.value.unwrap().email);
   }
 }
 
-watch(() => [info.value, getQwenRole()], refreshGreeting, {
+watch(() => [userInfo.value, getQwenRole()], refreshGreeting, {
   immediate: true,
   deep: true,
 });
@@ -70,21 +65,11 @@ function attemptToggleQwenRole() {
       <HeaderText>{{ websiteName }}</HeaderText>
     </template>
     <template #header-extra>
-      <ElDropdown v-if="info.isOk()" :style="{ margin: '10px' }">
-        <HeaderText :font-size="'12pt'" :style="{ cursor: 'pointer' }">
-          {{ info.unwrap().email }}
-        </HeaderText>
-        <template #dropdown>
-          <ElDropdownMenu>
-            <ElDropdownItem @click="logoutApi"> 退出 </ElDropdownItem>
-          </ElDropdownMenu>
-        </template>
-      </ElDropdown>
-      <span v-else>
-        <span>{{ info.unwrapErr().message }}</span>
-        <ElButton :type="'primary'" :style="{ margin: '15px' }" @click="$router.push('/login')">登录/注册</ElButton>
-      </span>
-
+      <HeaderText>
+        <ElButton :type="'primary'" :size="'large'" :circle="true" :icon="Plus" @click="$router.push('/editor')">
+        </ElButton>
+      </HeaderText>
+      <UserInfoDropdown></UserInfoDropdown>
       <SwitchDark></SwitchDark>
     </template>
     <FlexCard v-if="greeting.isOk()">

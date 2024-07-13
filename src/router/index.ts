@@ -20,9 +20,9 @@ const router = createRouter({
       component: () => import('@/views/VerifyView.vue'),
     },
     {
-      path: '/upload-image',
-      name: 'upload-image',
-      component: () => import('@/views/TestUploadImageView.vue'),
+      path: '/editor',
+      name: 'editor',
+      component: () => import('@/views/EditorView.vue'),
     },
   ],
 });
