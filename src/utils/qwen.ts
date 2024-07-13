@@ -25,6 +25,23 @@ export async function askQwen(
     return (await requestPromise).map((response) => response.response);
 }
 
+export interface ChatMsg {
+    role: string;
+    content: string;
+}
+
+export interface ChatHistory {
+    history: ChatMsg[];
+}
+
+
+export async function chatWithQwen(
+    history: ChatHistory,
+    info?: boolean,
+): Promise<Result<string, Error>> {
+    return await askQwen(JSON.stringify(history), info);
+}
+
 export const qwenRoles = ['活泼/女孩/偏好表情', '沉稳/大叔/偏好诗句'] as const;
 
 export type QwenRole = (typeof qwenRoles)[number];
