@@ -77,7 +77,7 @@ const answersTab = ref<'view-answers' | 'upload-answer'>('view-answers');
 const qwenCount = ref(0);
 const qwenAnswering = ref(false);
 
-async function stopQwenAnswer() {
+function stopQwenAnswer() {
   qwenCount.value++;
   qwenAnswering.value = false;
 }
@@ -94,9 +94,9 @@ async function qwenAnswer() {
   if (answerContent.value !== '') {
     answerContent.value += '\n\n';
   }
-  answerContent.value += 'Qwen：';
+  answerContent.value += '';
   await askQwen(JSON.stringify({
-    task: '你是Poesy网站(Quora+Poe)的问答AI助手Qwen，现在用户正在回答一个问题，要求你补全他的回答（如果answerContent为空则是从头开始回答），你不需要重复用户的回答，你的回答将会被插入到用户回答的下一段',
+    task: '你是Poesy网站(Quora+Poe)的问答AI助手Qwen，现在用户正在回答一个问题，要求你补全他的回答（如果answerContent为空则是从头开始回答），你不需要重复用户的回答，你的回答应该以\"Qwen: \"开头 将会被插入到用户回答的下一段',
     questionTitle,
     questionContent,
     answerContent: answerContent.value,
