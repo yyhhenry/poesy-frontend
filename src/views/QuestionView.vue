@@ -4,7 +4,7 @@ import { PageLayout, FlexCard, HeaderText, SwitchDark, FlexBox, } from '@yyhhenr
 import { ok, type Result, anyhow, safelyAsync } from '@yyhhenry/rust-result';
 import { ElButton, ElMessage, ElMessageBox, ElTabPane, ElTabs } from 'element-plus';
 import { computed, ref } from 'vue';
-import { DocumentAdd, HomeFilled } from '@element-plus/icons-vue';
+import { ChatDotRound, DocumentAdd, HomeFilled } from '@element-plus/icons-vue';
 import { useRoute } from 'vue-router';
 import { getQuestionApi } from '../utils/question';
 import MdBox from '@/components/MdBox.vue';
@@ -12,6 +12,7 @@ import MarkdownEditor from '@/components/MarkdownEditor.vue';
 import UserInfoDropdown from '@/components/UserInfoDropdown.vue';
 import { answerContentCache, getAnswersByQuestionApi, UploadAnswerApi } from '@/utils/answer';
 import { userInfo } from '@/utils/fetch';
+import { askQwen } from '@/utils/qwen';
 
 const route = useRoute();
 const questionId = computed((): Result<string, Error> => {
@@ -73,6 +74,43 @@ const answerContent = computed({
 });
 
 const answersTab = ref<'view-answers' | 'upload-answer'>('view-answers');
+const qwenCount = ref(0);
+const qwenAnswering = ref(false);
+
+function stopQwenAnswer() {
+  qwenCount.value++;
+  qwenAnswering.value = false;
+}
+
+async function qwenAnswer() {
+  if (question.value.isErr()) {
+    return;
+  }
+  const questionTitle = question.value.unwrap().title;
+  const questionContent = question.value.unwrap().content;
+  qwenAnswering.value = true;
+  qwenCount.value++;
+  const thisCount = qwenCount.value;
+  if (answerContent.value !== '') {
+    answerContent.value += '\n\n';
+  }
+  answerContent.value += '';
+  await askQwen(JSON.stringify({
+    task: '你是Poesy网站(Quora+Poe)的问答AI助手Qwen，现在用户正在回答一个问题，要求你补全他的回答（如果answerContent为空则是从头开始回答），你不需要重复用户的回答，你的回答应该以\"Qwen: \"开头 将会被插入到用户回答的下一段',
+    questionTitle,
+    questionContent,
+    answerContent: answerContent.value,
+  }), {
+    onMsg: (msg) => {
+      if (qwenCount.value !== thisCount) return;
+      answerContent.value += msg.response;
+    },
+    onDone: () => {
+      if (qwenCount.value !== thisCount) return;
+      qwenAnswering.value = false;
+    },
+  });
+}
 
 async function uploadAnswer() {
   if (questionId.value.isErr()) {
@@ -175,13 +213,22 @@ async function uploadAnswer() {
         </ElTabPane>
         <ElTabPane label="新建回答" name="upload-answer">
           <div :style="{ display: 'flex', justifyContent: 'space-between' }">
-            <HeaderText>
-              正在回答：{{ question.unwrap().title }}
-            </HeaderText>
-            <ElButton :type="'primary'" :plain="true" :size="'large'" :icon="DocumentAdd" @click="uploadAnswer">提交
+            <span>
+              <ElButton :type="'primary'" :plain="true" :size="'large'" :icon="ChatDotRound" @click="qwenAnswer"
+                v-if="!qwenAnswering">
+                Qwen 补全
+              </ElButton>
+              <ElButton :type="'danger'" :plain="true" :size="'large'" :icon="ChatDotRound" @click="stopQwenAnswer"
+                v-if="qwenAnswering">
+                停止 Qwen
+              </ElButton>
+            </span>
+            <ElButton :type="'primary'" :plain="true" :size="'large'" :icon="DocumentAdd" @click="uploadAnswer"
+              v-if="!qwenAnswering">提交
             </ElButton>
           </div>
-          <MarkdownEditor v-model="answerContent" :placeholder="'请输入回答内容'"></MarkdownEditor>
+          <MarkdownEditor :only-preview="qwenAnswering" v-model="answerContent" :placeholder="'请输入回答内容'">
+          </MarkdownEditor>
         </ElTabPane>
       </ElTabs>
 

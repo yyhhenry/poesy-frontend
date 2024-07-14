@@ -79,24 +79,27 @@ export function isErrorResponse(u: unknown): u is ErrorResponse {
   return isPartialUnknown<ErrorResponse>(u) && typeof u.error === 'string';
 }
 
-export interface PostOptions {
+export interface AuthOptions {
   skipAuth?: boolean;
+}
+
+export async function headerAuth(options?: AuthOptions): Promise<Record<string, string>> {
+  if (options?.skipAuth) {
+    return {};
+  }
+  const accessToken = await getAutoRefreshedToken();
+  if (accessToken.isErr()) {
+    throw accessToken.unwrapErr();
+  }
+  return { 'Authorization': `Bearer ${accessToken.unwrap()}` };
+}
+export interface PostOptions extends AuthOptions {
   formData?: boolean;
 }
 export async function post<T>(url: UrlLike, content: unknown | FormData, isT: Predicate<T>, options?: PostOptions): Promise<Result<T, Error>> {
   return await safelyAsync(async () => {
-    let auth = '';
-    if (!options?.skipAuth) {
-      const accessToken = await getAutoRefreshedToken();
-      if (accessToken.isErr()) {
-        throw accessToken.unwrapErr();
-      }
-      auth = `Bearer ${accessToken.unwrap()}`;
-    }
+    const headers: HeadersInit = await headerAuth(options);
     const body = options?.formData && content instanceof FormData ? content : JSON.stringify(content);
-    const headers: HeadersInit = {
-      'Authorization': auth,
-    };
     if (!options?.formData) {
       headers['Content-Type'] = 'application/json';
     }
@@ -115,24 +118,14 @@ export async function post<T>(url: UrlLike, content: unknown | FormData, isT: Pr
     return json;
   });
 }
-export interface GetOptions {
-  skipAuth?: boolean;
+export interface GetOptions extends AuthOptions {
 }
 export async function get<T>(url: UrlLike, isT: Predicate<T>, options?: GetOptions): Promise<Result<T, Error>> {
   return await safelyAsync(async () => {
-    let auth = '';
-    if (!options?.skipAuth) {
-      const accessToken = await getAutoRefreshedToken();
-      if (accessToken.isErr()) {
-        throw accessToken.unwrapErr();
-      }
-      auth = `Bearer ${accessToken.unwrap()}`;
-    }
+    const headers: HeadersInit = await headerAuth(options);
     const response = await fetch(url, {
       method: 'GET',
-      headers: {
-        'Authorization': auth,
-      },
+      headers,
     });
     const json = (await response.json()) as unknown;
     if (response.status !== 200) {
