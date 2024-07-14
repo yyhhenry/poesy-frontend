@@ -2,13 +2,12 @@
 import { ElIcon, ElInput, ElMessage, ElTabPane, ElTabs, ElUpload } from 'element-plus';
 import { UploadFilled } from '@element-plus/icons-vue';
 import { uploadImageApi } from '@/utils/image';
-import { useTypedStorage } from '@/utils/typed-storage';
-import { isString } from '@/utils/types';
 import MdBox from '@/components/MdBox.vue';
 import { computed, ref, watch, watchEffect } from 'vue';
 
 const props = defineProps<{
   modelValue: string | undefined;
+  onlyPreview?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -16,6 +15,12 @@ const emit = defineEmits<{
 }>();
 
 const editorTab = ref<'markdown' | 'preview'>('markdown');
+
+watchEffect(() => {
+  if (props.onlyPreview) {
+    editorTab.value = 'preview';
+  }
+});
 
 
 const editorContent = computed({
@@ -44,7 +49,7 @@ const fontFamily = 'Consolas, Monaco, \" Andale Mono\", \"Ubuntu Mono\" , monosp
 
 <template>
   <ElTabs v-model="editorTab">
-    <ElTabPane label="Markdown代码" name="markdown">
+    <ElTabPane label="Markdown代码" name="markdown" v-if="onlyPreview !== true">
       <ElInput v-model="editorContent" type="textarea" :style="{
         fontFamily
       }" :autosize="true"></ElInput>
