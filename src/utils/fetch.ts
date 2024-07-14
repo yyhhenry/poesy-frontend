@@ -83,9 +83,7 @@ export interface AuthOptions {
   skipAuth?: boolean;
 }
 
-export async function headerAuth(options?: AuthOptions): Promise<{
-  'Authorization': string;
-} | {}> {
+export async function headerAuth(options?: AuthOptions): Promise<Record<string, string>> {
   if (options?.skipAuth) {
     return {};
   }
