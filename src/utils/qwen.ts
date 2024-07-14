@@ -1,8 +1,9 @@
-import { post } from '@/utils/fetch';
+import { headerAuth } from '@/utils/fetch';
 import { isPartialUnknown } from './types';
-import { anyhow, type Result } from '@yyhhenry/rust-result';
+import { anyhow, err, ok, safely, safelyAsync, type Result } from '@yyhhenry/rust-result';
 import { ElMessage } from 'element-plus';
 import { useTypedStorage } from './typed-storage';
+import { ref, type Ref } from 'vue';
 
 export interface QwenResponse {
     response: string;
@@ -14,15 +15,61 @@ export function isQwenResponse(value: unknown): value is QwenResponse {
     );
 }
 
+export interface AskQwenOptions {
+    onMsg?: (response: QwenResponse) => void;
+    onDone?: () => void;
+    info?: boolean;
+}
 export async function askQwen(
     prompt: string,
-    info?: boolean,
-): Promise<Result<string, Error>> {
-    const requestPromise = post('/api/qwen/answer', { prompt }, isQwenResponse);
+    { onMsg, onDone, info }: AskQwenOptions = {},
+): Promise<Result<void, Error>> {
+    const response = await safelyAsync(async () => {
+        const headers = await headerAuth();
+        return await fetch('/api/qwen/answer-stream', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                ...headers,
+            },
+            body: JSON.stringify({ prompt }),
+        });
+    });
+    if (response.isErr()) {
+        return err(response.unwrapErr());
+    }
+    const reader = response.unwrap().body?.getReader();
+    if (!reader) {
+        return anyhow('无法获取响应');
+    }
+    let stopped = false;
+    async function readStream(reader: ReadableStreamDefaultReader<Uint8Array>) {
+        const decoder = new TextDecoder();
+        while (!stopped) {
+            const { done, value } = await reader.read();
+            if (done) {
+                onDone?.();
+                break;
+            }
+            const chunks = decoder.decode(value).split('\n').filter((line) => line.trim() !== '');
+            const objs = safely(() => chunks.map(chunk => JSON.parse(chunk) as unknown));
+            if (objs.isErr()) {
+                ElMessage.error('无法解析Qwen的回答');
+                console.error(chunks, objs.unwrapErr());
+                break;
+            }
+            for (const response of objs.unwrap()) {
+                if (isQwenResponse(response)) {
+                    onMsg?.(response);
+                }
+            }
+        }
+    }
     if (info === true) {
         ElMessage.info('正在等待Qwen的回答...');
     }
-    return (await requestPromise).map((response) => response.response);
+    readStream(reader); // No await here, because we want to return the ref immediately
+    return ok();
 }
 
 export interface ChatMsg {
@@ -37,9 +84,9 @@ export interface ChatHistory {
 
 export async function chatWithQwen(
     history: ChatHistory,
-    info?: boolean,
-): Promise<Result<string, Error>> {
-    return await askQwen(JSON.stringify(history), info);
+    options: AskQwenOptions = {},
+): Promise<Result<void, Error>> {
+    return await askQwen(JSON.stringify(history), options);
 }
 
 export const qwenRoles = ['活泼/女孩/偏好表情', '沉稳/大叔/偏好诗句'] as const;
@@ -62,7 +109,7 @@ export function toggleQwenRole(): void {
     qwenRole.value = qwenRoles[newIndex];
 }
 
-export async function qwenGreeting(email: string): Promise<Result<string, Error>> {
+export async function qwenGreeting(email: string, options: AskQwenOptions = {}): Promise<Result<void, Error>> {
     const role = getQwenRole();
     const requestJson = {
         背景: '你是网站Poesy（意味着Quora和Poe的结合）的主页迎宾员AI',
@@ -71,5 +118,5 @@ export async function qwenGreeting(email: string): Promise<Result<string, Error>
         人设: role,
         时间: new Date().toLocaleString(),
     };
-    return await askQwen(JSON.stringify(requestJson));
+    return await askQwen(JSON.stringify(requestJson), options);
 }

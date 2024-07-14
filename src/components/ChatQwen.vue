@@ -17,7 +17,7 @@
                 </div>
             </div>
             <div class="input-area">
-                <input v-model="userInput" @keyup.enter="submitMessage" type="text"
+                <input ref="inputElem" v-model="userInput" @keyup.enter="submitMessage" type="text"
                     placeholder="Type your message..." />
             </div>
         </div>
@@ -80,6 +80,7 @@ import { chatWithQwen, type ChatHistory } from '@/utils/qwen';
 import MdBox from './MdBox.vue';
 
 const userInput = ref('');
+const inputElem = ref<HTMLInputElement | null>(null);
 const messages = ref([
     {
         role: 'system',
@@ -94,20 +95,28 @@ const messages = ref([
 const submitMessage = async () => {
     if (!userInput.value.trim()) return;
     const userMessage = userInput.value.trim();
+
     messages.value.push({ role: 'user', content: userMessage });
     userInput.value = '';
     const history = {
         history: messages.value
     } satisfies ChatHistory;
-    const qwenResponse = await chatWithQwen(history, true);
+    const thisCount = messages.value.length;
+    messages.value.push({
+        role: 'assistant',
+        content: '',
+    });
+    const qwenResponse = await chatWithQwen(history, {
+        onMsg: (msg) => {
+            if (messages.value.length !== thisCount + 1) return;
+            messages.value[thisCount].content += msg.response;
+            inputElem.value?.scrollIntoView();
+        },
+    });
     if (qwenResponse.isErr()) {
         ElMessage.error(qwenResponse.unwrapErr().message);
         return;
     }
-    messages.value.push({
-        role: 'assistant',
-        content: qwenResponse.unwrap(),
-    });
 };
 </script>
 

@@ -13,7 +13,7 @@ import {
   ElMessageBox,
 } from 'element-plus';
 import { websiteName } from '@/utils/website-name';
-import { anyhow, type Result } from '@yyhhenry/rust-result';
+import { anyhow, ok, type Result } from '@yyhhenry/rust-result';
 import { tokenPairStorage, userInfo } from '@/utils/fetch';
 import {
   getQwenRole,
@@ -24,8 +24,10 @@ import { onMounted, ref, watch, watchEffect } from 'vue';
 import { ChatDotRound, Plus, Refresh } from '@element-plus/icons-vue';
 import UserInfoDropdown from '@/components/UserInfoDropdown.vue';
 import { getLatestQuestionsApi, type QuestionsResponse } from '@/utils/question';
+import { useTimestamp } from '@vueuse/core';
 
 const greeting = ref<Result<string, Error>>(anyhow('Qwen的问候正在赶来'));
+const chatCount = ref(0);
 
 watchEffect(() => {
   if (tokenPairStorage.value === undefined) {
@@ -35,8 +37,23 @@ watchEffect(() => {
 });
 
 async function refreshGreeting() {
-  if (userInfo.value.isOk()) {
-    greeting.value = await qwenGreeting(userInfo.value.unwrap().email);
+  chatCount.value++;
+  const thisCount = chatCount.value;
+  greeting.value = ok('');
+  if (userInfo.value.isErr()) {
+    greeting.value = anyhow('登录后才能收到Qwen的问候');
+    return;
+  }
+  const email = userInfo.value.unwrap().email;
+  const result = await qwenGreeting(email, {
+    onMsg: (msg) => {
+      if (chatCount.value !== thisCount) return;
+      greeting.value = greeting.value.map((g) => g + msg.response);
+    },
+  });
+  if (result.isErr()) {
+    ElMessage.error(result.unwrapErr().message);
+    return;
   }
 }
 
@@ -70,6 +87,7 @@ async function loadMoreQuestions() {
   questionBriefs.value.questionBriefs.push(...newBriefs);
 }
 onMounted(loadMoreQuestions);
+const timestamp = useTimestamp();
 </script>
 
 <template>
@@ -100,7 +118,7 @@ onMounted(loadMoreQuestions);
           </span>
         </div>
       </template>
-      <p>{{ greeting.unwrap() }}</p>
+      <p> {{ greeting.unwrap() }} </p>
     </FlexCard>
     <FlexBox v-if="greeting.isErr()">
       <div :style="{
