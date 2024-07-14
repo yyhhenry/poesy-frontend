@@ -5,16 +5,14 @@ import { ok, type Result, anyhow, safelyAsync } from '@yyhhenry/rust-result';
 import { ElButton, ElMessage, ElMessageBox, ElTabPane, ElTabs } from 'element-plus';
 import { computed, ref } from 'vue';
 import { DocumentAdd, HomeFilled } from '@element-plus/icons-vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { getQuestionApi } from '../utils/question';
 import MdBox from '@/components/MdBox.vue';
 import MarkdownEditor from '@/components/MarkdownEditor.vue';
-import { useTypedStorage } from '@/utils/typed-storage';
-import { isString } from '@/utils/types';
 import UserInfoDropdown from '@/components/UserInfoDropdown.vue';
 import { answerContentCache, getAnswersByQuestionApi, UploadAnswerApi } from '@/utils/answer';
+import { userInfo } from '@/utils/fetch';
 
-const router = useRouter();
 const route = useRoute();
 const questionId = computed((): Result<string, Error> => {
   const questionId = route.query.id;
@@ -49,15 +47,28 @@ const answerContent = computed({
       return '';
     }
     const id = questionId.value.unwrap();
-    return answerContentCache.value?.[id] ?? '';
+    if (userInfo.value.isErr()) {
+      return '';
+    }
+    const email = userInfo.value.unwrap().email;
+    const key = `${email}:${id}`;
+    return answerContentCache.value?.[key] ?? '';
   },
   set: (value: string) => {
     if (questionId.value.isErr()) {
       return;
     }
     const id = questionId.value.unwrap();
+    if (userInfo.value.isErr()) {
+      return;
+    }
+    const email = userInfo.value.unwrap().email;
+    const key = `${email}:${id}`;
     answerContentCache.value ??= {};
-    answerContentCache.value[id] = value;
+    answerContentCache.value[key] = value;
+    if (value === '') {
+      delete answerContentCache.value[key];
+    }
   }
 });
 
